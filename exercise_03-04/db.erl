@@ -30,6 +30,5 @@ match(Element, [ _ | RestData], Matches) -> match(Element, RestData,  Matches).
 
 % Helper function
 reverse(Data) -> reverse(Data, []).
-
 reverse([], List) ->  List;
 reverse([H|T], List) ->  reverse(T, [H|List]).
