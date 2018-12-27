@@ -1,11 +1,10 @@
--module(parser).
--export([print/1]).
+-module(compiler).
+-export([compile/1]).
 
-%% A pretty printer, which will turn an exp into a string representation
-print(Expression) -> lists:flatten(pretty_printer_1(Expression)).
+%% A compiler, which transforms an exp into a sequence of code for a stack machine to evaluate the exp
 
-pretty_printer_1({num, Num}) -> io_lib:format("~B", [Num]);
-pretty_printer_1({minus, A, B}) -> 
-  io_lib:format("(~s - ~s)", [pretty_printer_1(A), pretty_printer_1(B)]);
-pretty_printer_1({plus, A, B}) -> 
-  io_lib:format("(~s + ~s)", [pretty_printer_1(A), pretty_printer_1(B)]).
+compile(Expression) -> compile_1(Expression).
+
+compile_1({num, Num}) -> [{push, Num}];
+compile_1({minus, A, B}) ->  compile_1(A) ++ compile_1(B) ++ [{minus}] ;
+compile_1({plus, A, B}) -> compile_1(A) ++ compile_1(B) ++ [{'plus'}].
