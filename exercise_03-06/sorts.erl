@@ -50,8 +50,8 @@ split_in_two([H|T], Left, Right) -> split_in_two(T, Right, [H|Left]).
 megre(SortedLeft, SortedRight) -> merge(SortedLeft, SortedRight, []).
 
 merge([], [], Result) -> Result;
-merge([], Right, Result) -> Result ++ Right;
-merge(Left, [], Result) -> Result ++ Left;
+merge([], Right, Result) -> append(Result, Right);
+merge(Left, [], Result) -> append(Result, Left);
 
 merge([HeadLeft|Left], [HeadRight|Right], Result) -> 
   if
