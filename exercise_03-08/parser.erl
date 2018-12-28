@@ -12,7 +12,7 @@ parse_1(unknown, [H|T], [], Result) ->
   Type = type_of(H),
   case Type of
     unknown -> {error, lists:flatten(io_lib:format("element '~c' is unkown.", [H]))};
-    space   -> parse_1(unknown, T, [], Result); 
+    ignore   -> parse_1(unknown, T, [], Result); 
     _       -> parse_1(Type, [H|T], [], Result)
   end;
 
@@ -54,7 +54,7 @@ type_of(N)  when N == $+        -> plus;
 type_of(N)  when N == $-        -> minus;
 type_of(N)  when N == $*        -> multiply;
 type_of(N)  when N == $/        -> devide;
-type_of(N)  when N == 32        -> space;
+type_of(N)  when N == 32        -> ignore;
 type_of(_)  -> unknown.
 
 convert_to_number(List) when is_list(List) -> {num, list_to_integer(List)}.
