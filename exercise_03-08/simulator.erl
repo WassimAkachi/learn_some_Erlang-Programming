@@ -10,6 +10,10 @@ simulate_1([], [Result]) -> Result;
 
 simulate_1([{push, Num}|Data], Stack) -> simulate_1(Data, Stack ++ [Num]);
 
+simulate_1([{uniary_minus}|Data], [A|Stack]) -> 
+  NewStack = Stack ++ [-A],
+  simulate_1(Data, NewStack);
+
 simulate_1([{minus}|Data], [A,B|Stack]) -> 
   NewStack = Stack ++ [A - B],
   simulate_1(Data, NewStack);

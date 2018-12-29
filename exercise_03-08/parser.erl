@@ -34,6 +34,9 @@ parse_1(num, [H|T], Acc, Result) when H < $0 orelse H > $9 ->
 parse_1(parant_open, [H|T], [], Result) when H == $( ->
   parse_1(unknown, T, [], Result ++ [{parant_open}]);
 
+parse_1(uniary_minus, [H|T], [], Result) when H == $~ ->
+  parse_1(unknown, T, [], Result ++ [{uniary_minus}]);
+
 parse_1(plus, [H|T], [], Result) when H == $+ ->
   parse_1(unknown, T, [], Result ++ [{plus}]);
 
@@ -52,6 +55,9 @@ parse_1(parant_close, [H|T], [], Result) when H == $) ->
 to_postfix(List) -> to_postfix(List, [], []).
 
 to_postfix([], [], Result) -> Result;
+
+to_postfix([{uniary_minus}|T], Stack, Result) -> 
+  to_postfix(T, Stack, Result ++ [{uniary_minus}]);
 
 to_postfix([{num, N}|T], Stack, Result) -> 
   to_postfix(T, Stack, Result ++ [{num, N}]);
@@ -85,7 +91,13 @@ format(List) ->
 format_1([]) -> {ignore, []};
 format_1([{num,A}|T]) -> {{num,A}, T};
 
-format_1([{Op}|T]) when Op == plus orelse Op == minus orelse Op == multiply orelse Op == divide -> 
+format_1([{uniary_minus}|T]) -> 
+  {A, Rest } = format_1(T),
+  {{uniary_minus, A}, Rest};
+
+format_1([{Op}|T]) when Op == plus orelse 
+  Op == minus orelse Op == multiply orelse 
+  Op == divide -> 
   {A, Rest1} = format_1(T),
   {B, Rest2} = format_1(Rest1),
   {{Op, A, B}, Rest2}.
@@ -106,6 +118,7 @@ type_of(N)  when N == $+        -> plus;
 type_of(N)  when N == $-        -> minus;
 type_of(N)  when N == $*        -> multiply;
 type_of(N)  when N == $/        -> divide;
+type_of(N)  when N == $~        -> uniary_minus;
 type_of(N)  when N == 32        -> ignore; % Spacee
 type_of(_)  -> unknown.
 
