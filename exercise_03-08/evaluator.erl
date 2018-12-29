@@ -5,4 +5,6 @@
 
 evaluate({num, Num}) -> Num;
 evaluate({minus, A, B}) -> evaluate(A) - evaluate(B);
-evaluate({plus, A, B}) -> evaluate(A) + evaluate(B).
+evaluate({plus, A, B}) -> evaluate(A) + evaluate(B);
+evaluate({multiply, A, B}) -> evaluate(A) * evaluate(B);
+evaluate({divide, A, B}) -> evaluate(A) div evaluate(B).
