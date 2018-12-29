@@ -1,8 +1,6 @@
 -module(parser).
 -export([parse/1]).
 
-% 4
-
 parse(Expression)  -> 
   ReversedExpression = lists:reverse(Expression),
   NewExpression = correcte_parants(ReversedExpression),
@@ -11,14 +9,7 @@ parse(Expression)  ->
   Prefixed = lists:reverse(Postfixed),
   format(Prefixed).
 
-correcte_parants(List) -> lists:reverse(correcte_parants(List, [])).
-
-correcte_parants([], Result) -> Result;
-correcte_parants([H|T], Result) when H == $( -> correcte_parants(T, [$) | Result]);
-correcte_parants([H|T], Result) when H == $) -> correcte_parants(T, [$( | Result]);
-correcte_parants([H|T], Result) -> correcte_parants(T, [H | Result]).
-
-parse_1(unknown, [], [], Result) ->
+parse_1(_, [], [], Result) ->
   Result;
 
 parse_1(unknown, [H|T], [], Result) ->
@@ -82,7 +73,6 @@ to_postfix([HExp|TExp], [HStack|TStack], Result) when HStack == {parant_open} ->
 to_postfix([], [HStack|TStack], Result) ->
   to_postfix([], TStack, Result ++ [HStack]).
 
-
 to_postfix([], Result) -> {[], Result};
 to_postfix([{parant_open}|T], Result) -> {T, Result};
 to_postfix([N|T], Result) -> to_postfix(T, Result ++ [N]).
@@ -101,6 +91,14 @@ format_1([{Op}|T]) when Op == plus orelse Op == minus orelse Op == multiply orel
   {{Op, A, B}, Rest2}.
 
 %% Helper
+
+correcte_parants(List) -> lists:reverse(correcte_parants(List, [])).
+
+correcte_parants([], Result) -> Result;
+correcte_parants([H|T], Result) when H == $( -> correcte_parants(T, [$) | Result]);
+correcte_parants([H|T], Result) when H == $) -> correcte_parants(T, [$( | Result]);
+correcte_parants([H|T], Result) -> correcte_parants(T, [H | Result]).
+
 type_of(N)  when N >= $0 andalso N =< $9 -> num;
 type_of(N)  when N == $(        -> parant_open;
 type_of(N)  when N == $)       -> parant_close;
