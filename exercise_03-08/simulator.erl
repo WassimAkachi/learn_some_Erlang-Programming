@@ -14,6 +14,14 @@ simulate_1([{minus}|Data], [A,B|Stack]) ->
   NewStack = Stack ++ [A - B],
   simulate_1(Data, NewStack);
 
+simulate_1([{multiply}|Data], [A,B|Stack]) -> 
+  NewStack = Stack ++ [A * B],
+  simulate_1(Data, NewStack);
+
+simulate_1([{divide}|Data], [A,B|Stack]) -> 
+  NewStack = Stack ++ [A div B],
+  simulate_1(Data, NewStack);
+
 simulate_1([{plus}|Data], [A,B|Stack]) -> 
   NewStack = Stack ++ [A + B],
   simulate_1(Data, NewStack).
