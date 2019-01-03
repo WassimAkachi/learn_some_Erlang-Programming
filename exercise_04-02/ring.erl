@@ -5,8 +5,10 @@ start(N, M, Message) when N > 0 andalso M > 0 ->
   start_1(N, M, Message).
 
 start_1(N, M, Message) ->
-  register(ring_head_node, spawn(ring, process_init, [head, N, M, Message])),
-  ok.
+  case whereis(ring_head_node) of
+    undefined -> register(ring_head_node, spawn(ring, process_init, [head, N, M, Message]));
+    _ -> {error, already_started}
+  end.
 
 process_init(head, N, M, Message) ->
   print("Head node is registered"),
