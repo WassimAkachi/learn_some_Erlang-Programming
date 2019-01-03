@@ -1,8 +1,11 @@
 -module(ring).
 -export([start/3, process_init/4, shutdown/0]).
 
-start(N, M, Message) when N > 0 andalso M > 0 ->
-  start_1(N, M, Message).
+start(N, M, Message) when N > 1 andalso M > 0 ->
+  start_1(N, M, Message);
+
+start(N, M, _) ->
+  {error, can_not_start_ring_with_n_less_2_m_less_1, {n, N, m, M}}.
 
 start_1(N, M, Message) ->
   case whereis(ring_head_node) of
@@ -22,7 +25,7 @@ process_init(ParentPid, 1, M, Message) ->
   print("Last node start looping"),
   loop({ParentPid, M, Message});
 
-process_init(ParentPid, N, M, Message) ->
+process_init(ParentPid, N, M, Message) when N > 0 andalso M > 0 ->
   print({"New process is starting", parrent, ParentPid, proc_number, N}),
   spawn(ring, process_init, [self(), N-1, M, Message]),
   print({"Node start looping", parrent, ParentPid, proc_number, N}),
@@ -65,6 +68,10 @@ send(M, Message, Pid) ->
   print({send_to, Pid, message_to_send, Message}),
   Pid ! Message, send(M-1, Message, Pid).
 
-shutdown() -> ring_head_node ! {request, stop}, ok.
+shutdown() -> 
+  case whereis(ring_head_node) of
+    undefined -> {error, already_down};
+    _ -> ring_head_node ! {request, stop}, ok
+  end.  
 
 print(Object) -> io:format("~p ~n", [{self(), msg, Object}]).
