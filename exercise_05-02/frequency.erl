@@ -1,11 +1,6 @@
 -module(frequency).
 -export([start/0, init/0, stop/0, allocate/0, deallocate/1]).
-
--ifdef(debug_print).
-  -define(DEBUG(Format, Content), io:format(Format, Content)).
--else.
-  -define(DEBUG(Format, Content), ok).
--endif.
+-include("../defines.hrl").
 
 init() ->
   loop({get_frequencies(), []}).
