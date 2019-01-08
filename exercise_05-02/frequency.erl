@@ -17,8 +17,8 @@ loop({FreeFrequencies, AllocatedFrequencies}) ->
       ?DEBUG("~p~n", [{deallocate, Pid, Freq}]),
       loop({Free, Allocated});
     
-    {?MODULE, {stop, Pid}} ->
-      stop_node(Pid, FreeFrequencies, AllocatedFrequencies)
+    {?MODULE, {stop, _Pid}} ->
+      stop_node({FreeFrequencies, AllocatedFrequencies})
   end.
 
 allocate_frequency_for({Pid, [], AllocatedFrequencies}) -> 
@@ -44,13 +44,21 @@ deallocate_frequency({Pid, Freq, FreeFrequencies, [{Pid, Freq}|AllocatedFrequenc
 deallocate_frequency({Pid, Freq, FreeFrequencies, [Item | AllocatedFrequencies]}, Acc) ->
   deallocate_frequency({Pid, Freq, FreeFrequencies, AllocatedFrequencies}, [Item | Acc]).
 
-stop_node(_Pid, _FreeFrequencies, []) -> ok;
+stop_node({_, []}) -> ok;
 
-stop_node(_Pid, _FreeFrequencies, [{Pid, _} | AllocatedFrequencies]) -> 
-  exit(Pid, {?MODULE, is_shuting_down}),
-  stop_node(_Pid, _FreeFrequencies, AllocatedFrequencies);
+stop_node({_, AllocatedFrequencies}) -> 
+  receive
 
-stop_node(_Pid, _FreeFrequencies, _AllocatedFrequencies) -> ok.
+    {?MODULE, {allocate, Pid}} -> 
+      replay({error, server_is_shutting_down}, Pid),
+      stop_node({[], AllocatedFrequencies});
+
+    {?MODULE, {deallocate, Pid, Freq}} ->
+      {_, Allocated} = deallocate_frequency_for({Pid, Freq, [], AllocatedFrequencies}),
+      ?DEBUG("~p~n", [{deallocate, Pid, Freq}]),
+      stop_node({[], Allocated})
+
+  end.
 
 get_frequencies() -> [89,67].
 
@@ -79,6 +87,7 @@ allocate() ->
   receive 
     {?MODULE, replay, {error, no_frequence}} -> {error, no_frequence};
     {?MODULE, replay, {ok, Freq}} -> Freq;
+    {?MODULE, replay, {error, server_is_shutting_down}} -> server_is_shutting_down;
     Msq -> Msq
     end.
 
