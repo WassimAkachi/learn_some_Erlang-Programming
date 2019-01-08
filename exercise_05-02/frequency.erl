@@ -72,7 +72,10 @@ start() ->
 
 stop() ->
   ?DEBUG("stop ~p~n", [?MODULE]),
-  call({stop, self()}), ok.
+  case whereis(?MODULE) of 
+    undefined -> {error, already_stopped};
+    _ -> call({stop, self()}), ok
+    end.
 
 
 allocate() ->
