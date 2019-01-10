@@ -8,8 +8,16 @@ init() ->
 loop({FreeFrequencies, AllocatedFrequencies}) ->
   receive 
     {?MODULE, {allocate, Pid}} ->
-      {Free, Allocated} = allocate_frequency_for({Pid, FreeFrequencies, AllocatedFrequencies}),
-      ?DEBUG("~p~n", [{allocate, Pid}]),
+      case lists:any(fun(Item) -> {APid, _} = Item, APid == Pid end, AllocatedFrequencies) of
+        true -> 
+          replay(Pid, {error, you_have_already_a_frequence}),
+          ?DEBUG("~p~n", [{not_allocated, Pid}]),
+          {Free, Allocated} = {FreeFrequencies, AllocatedFrequencies};
+        
+        false -> 
+          {Free, Allocated} = allocate_frequency_for({Pid, FreeFrequencies, AllocatedFrequencies}),
+          ?DEBUG("~p~n", [{allocated, Pid}])
+      end,
       loop({Free, Allocated});
     
     {?MODULE, {deallocate, Pid, Freq}} ->
