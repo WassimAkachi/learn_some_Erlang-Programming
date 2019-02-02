@@ -7,27 +7,34 @@ init() ->
 
 loop({FreeFrequencies, AllocatedFrequencies}) ->
   receive 
-    {?MODULE, {allocate, Pid}} ->
-      case lists:any(fun(Item) -> {APid, _} = Item, APid == Pid end, AllocatedFrequencies) of
-        true -> 
-          replay(Pid, {error, you_have_already_a_frequence}),
-          ?DEBUG("~p~n", [{not_allocated, Pid}]),
-          {Free, Allocated} = {FreeFrequencies, AllocatedFrequencies};
-        
-        false -> 
-          {Free, Allocated} = allocate_frequency_for({Pid, FreeFrequencies, AllocatedFrequencies}),
-          ?DEBUG("~p~n", [{allocated, Pid}])
-      end,
-      loop({Free, Allocated});
-    
-    {?MODULE, {deallocate, Pid, Freq}} ->
-      {Free, Allocated} = deallocate_frequency_for({Pid, Freq, FreeFrequencies, AllocatedFrequencies}),
-      ?DEBUG("~p~n", [{deallocate, Pid, Freq}]),
-      loop({Free, Allocated});
-    
     {?MODULE, {stop, _Pid}} ->
-      stop_node({FreeFrequencies, AllocatedFrequencies})
+      stop_node({FreeFrequencies, AllocatedFrequencies});
+
+    {?MODULE, Message} ->
+      NewState = handle_msg(Message, {FreeFrequencies, AllocatedFrequencies}),
+      loop(NewState)
   end.
+
+
+handle_msg({deallocate, Pid, Freq}, {FreeFrequencies, AllocatedFrequencies}) ->
+  {Free, Allocated} = deallocate_frequency_for({Pid, Freq, FreeFrequencies, AllocatedFrequencies}),
+  ?DEBUG("~p~n", [{deallocate, Pid, Freq}]),
+  {Free, Allocated};
+
+
+handle_msg({allocate, Pid}, {FreeFrequencies, AllocatedFrequencies}) ->
+  case lists:any(fun(Item) -> {APid, _} = Item, APid == Pid end, AllocatedFrequencies) of
+    true -> 
+      replay(Pid, {error, you_have_already_a_frequence}),
+      ?DEBUG("~p~n", [{not_allocated, Pid}]),
+      {Free, Allocated} = {FreeFrequencies, AllocatedFrequencies};
+    
+    false -> 
+      {Free, Allocated} = allocate_frequency_for({Pid, FreeFrequencies, AllocatedFrequencies}),
+      ?DEBUG("~p~n", [{allocated, Pid}])
+  end,
+  {Free, Allocated}.
+
 
 allocate_frequency_for({Pid, [], AllocatedFrequencies}) -> 
   replay({error, no_frequence}, Pid),
