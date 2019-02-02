@@ -1,4 +1,4 @@
--module(list).
+-module(list_0302).
 -export([create/1, reverse_create/1]).
 
 create(N) when N >= 0 -> create_acc(N, []).
