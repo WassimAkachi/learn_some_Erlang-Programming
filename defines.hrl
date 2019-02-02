@@ -1,0 +1,5 @@
+-ifdef(debug_print).
+  -define(DEBUG(Format, Content), io:format(Format, Content)).
+-else.
+  -define(DEBUG(Format, Content), ok).
+-endif.
