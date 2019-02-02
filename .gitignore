@@ -337,3 +337,5 @@ $RECYCLE.BIN/
 # End of https://www.gitignore.io/api/vim,git,linux,macos,erlang,windows,intellij,sublimetext,intellij+all,intellij+iml,visualstudiocode
 
 
+.erllibs
+.erllibs/
