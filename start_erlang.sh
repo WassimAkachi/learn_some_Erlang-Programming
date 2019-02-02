@@ -23,3 +23,18 @@ done
   set -x
   erl $ERL_LIBS
 )
+
+(
+  for EXERCISE in $(ls ${WDIR})
+  do
+    NEW_LIB="${WDIR}/${EXERCISE}"
+    if [ -d ${NEW_LIB} ]
+    then
+      (
+        set -x
+        cd ${NEW_LIB}
+        rm *.beam
+      )
+    fi
+  done
+)
